@@ -1,0 +1,37 @@
+# dsh-omni-auto — plugin manifest.
+#
+# One insert row mounts the plugin. `config` is passed to `apply(ctx, config)`.
+#
+# Tuning knobs (all optional; defaults in lib/index.js):
+#   enabled          : true   — master switch; false leaves tools/post-execute byte-identical
+#   tools            : ['bash'] — tool names eligible for automatic distillation
+#   minBytes         : 4000   — smaller results are returned untouched
+#   skipJson         : true   — never rewrite JSON/NDJSON payloads (line drops corrupt them)
+#   preserveMarkers  : true   — keep bash's `[exit code: N]` / `[still running ...]` lines
+#   timeoutMs        : 15000  — per-call budget for the OMNI worker
+#   spillDir         : '/tmp/dsh-omni-auto-spill' — where raw copies are kept
+#   spillRetentionDays: 7    — raw copies older than this are removed
+#   omniBin          : '/home/administrator/.local/bin/omni'
+#   omniCwd          : ''     — OMNI resolves its database from the worker cwd
+#   omniEnv          : {}     — extra environment merged over the host environment
+#
+# The worker is spawned with OMNI_MCP_TOOLS=all: a plain tool list does not
+# expose `omni_signal_extract`, which is the only text distiller OMNI offers.
+- insert:
+    - id: omni-auto
+      name: dsh-omni-auto
+      config:
+        enabled: true
+        tools:
+          - bash
+        minBytes: 4000
+        skipJson: true
+        preserveMarkers: true
+        timeoutMs: 15000
+        spillDir: /tmp/dsh-omni-auto-spill
+        spillRetentionDays: 7
+        omniBin: /home/administrator/.local/bin/omni
+        omniCwd: /home/administrator/agent-workspace
+        omniEnv:
+          OMNI_AGENT_ID: dsh
+          OMNI_DB_PATH: /home/administrator/agent-workspace/.omni/omni.db
